@@ -1,0 +1,22 @@
+sudo: required
+services:
+    - docker
+    
+before_install:
+    - docker build -t iYordanova/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+    - docker run iYordanova/react-test npm test -- --coverage
+    
+after_success:
+    - docker build -t iYordanova/multi-client ./client
+    - docker build -t iYordanova/multi-nginx ./nginx
+    - docker build -t iYordanova/multi-server ./server
+    - docker build -t iYordanova/multi-worker ./worker
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+    - docker push iYordanova/multi-client 
+    - docker push iYordanova/multi-nginx
+    - docker push iYordanova/multi-server
+    - docker push iYordanova/multi-worker
+    
+    
